@@ -82,36 +82,36 @@ int ad719x_init(struct ad719x_dev **device,
 	/* Reset */
 	ret = ad719x_reset(dev);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	ret = ad719x_get_register_value(dev, AD719X_REG_ID, 1, &reg_val);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	switch (dev->chip_id) {
 	case AD7190:
 		if((reg_val & AD7190_4_ID_MASK) != AD7190) {
-			goto error_sync;
+			goto error_spi;
 		}
 		break;
 	case AD7192:
 		if((reg_val & AD7190_4_ID_MASK) != AD7192) {
-			goto error_sync;
+			goto error_spi;
 		}
 		break;
 	case AD7193:
 		if((reg_val & AD7190_4_ID_MASK) != AD7193) {
-			goto error_sync;
+			goto error_spi;
 		}
 		break;
 	case AD7194:
 		if((reg_val & AD7190_4_ID_MASK) != AD7194) {
-			goto error_sync;
+			goto error_spi;
 		}
 		break;
 	case AD7195:
 		if((reg_val & AD7195_ID_MASK) != AD7195) {
-			goto error_sync;
+			goto error_spi;
 		}
 		break;
 	default:
@@ -122,33 +122,33 @@ int ad719x_init(struct ad719x_dev **device,
 	ret = ad719x_range_setup(dev, init_param.current_polarity,
 				 init_param.current_gain);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	ret = ad719x_output_rate_select(dev, init_param.data_rate_code);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	ret = ad719x_buffer_select(dev, init_param.buffer);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	if(dev->chip_id == AD7193 || dev->chip_id == AD7194) {
 		ret = ad719x_config_input_mode(dev, init_param.input_mode);
 		if (ret != 0)
-			goto error_sync;
+			goto error_spi;
 	}
 
 	ret = ad719x_clock_select(dev, init_param.clock_source);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	ret = ad719x_set_bridge_switch(dev, init_param.bpdsw_mode);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	ret = ad719x_set_operating_mode(dev, init_param.operating_mode);
 	if (ret != 0)
-		goto error_sync;
+		goto error_spi;
 
 	*device = dev;
 
