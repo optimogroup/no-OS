@@ -260,8 +260,8 @@ int ad719x_reset(struct ad719x_dev *dev);
 int ad719x_set_operating_mode(struct ad719x_dev *dev,
 			      enum ad719x_adc_modes opt_mode);
 
-/*! Waits for RDY pin to go low. */
-int ad719x_wait_rdy_go_low(struct ad719x_dev *dev);
+/*! Waits for RDY stat. */
+int ad719x_wait_rdy_stat(struct ad719x_dev *dev);
 
 /*! Selects the channels to be enabled. */
 int ad719x_channels_select(struct ad719x_dev *dev, uint16_t chn_mask);

@@ -79,23 +79,6 @@ int ad719x_init(struct ad719x_dev **device,
 	if (ret != 0)
 		goto error_dev;
 
-	/* GPIO */
-	ret = no_os_gpio_get(&dev->gpio_miso, init_param.gpio_miso);
-	if (ret != 0)
-		goto error_spi;
-
-	ret = no_os_gpio_direction_input(dev->gpio_miso);
-	if (ret != 0)
-		goto error_miso;
-
-	ret = no_os_gpio_get_optional(&dev->sync_pin, init_param.sync_pin);
-	if (ret != 0)
-		goto error_miso;
-
-	ret = no_os_gpio_direction_output(dev->sync_pin, NO_OS_GPIO_HIGH);
-	if (ret != 0)
-		goto error_sync;
-
 	/* Reset */
 	ret = ad719x_reset(dev);
 	if (ret != 0)
@@ -171,10 +154,6 @@ int ad719x_init(struct ad719x_dev **device,
 
 	return ret;
 
-error_sync:
-	no_os_gpio_remove(dev->sync_pin);
-error_miso:
-	no_os_gpio_remove(dev->gpio_miso);
 error_spi:
 	no_os_spi_remove(dev->spi_desc);
 error_dev:
@@ -195,10 +174,6 @@ int ad719x_remove(struct ad719x_dev *dev)
 	int ret;
 
 	ret = no_os_spi_remove(dev->spi_desc);
-	if (ret != 0)
-		return ret;
-
-	ret = no_os_gpio_remove(dev->gpio_miso);
 	if (ret != 0)
 		return ret;
 
@@ -361,24 +336,29 @@ int ad719x_set_operating_mode(struct ad719x_dev *dev,
 }
 
 /***************************************************************************//**
- * @brief Waits for RDY pin to go low.
+ * @brief Waits for RDY on the status register.
  *
  * @return 0 in case of success or negative error code.
 *******************************************************************************/
-int ad719x_wait_rdy_go_low(struct ad719x_dev *dev)
+int ad719x_wait_rdy_stat(struct ad719x_dev *dev)
 {
-	uint8_t wait = 1;
-	uint16_t timeout = 0xFFFF;
-	int ret;
+    uint16_t timeout = 0xFFFF;
+    int ret;
 
-	while (wait && (timeout > 0)) {
-		ret = no_os_gpio_get_value(dev->gpio_miso, &wait);
-		if (ret != 0)
-			break;
-		timeout--;
-	}
+    while (timeout > 0) {
+        uint32_t status;
+        ret = ad719x_get_register_value(dev, AD719X_REG_STAT, 1, &status);
 
-	return ret;
+        if (ret != 0)
+            break;
+
+        if ((status & AD719X_STAT_RDY) == 0)
+            break;
+
+        timeout--;
+    }
+
+    return ret;
 }
 
 /***************************************************************************//**
@@ -442,7 +422,7 @@ int ad719x_calibrate(struct ad719x_dev *dev,
 	if (ret != 0)
 		return ret;
 
-	return ad719x_wait_rdy_go_low(dev);
+	return ad719x_wait_rdy_stat(dev);
 }
 
 /***************************************************************************//**
@@ -636,7 +616,7 @@ int ad719x_single_conversion(struct ad719x_dev *dev, uint32_t *reg_data)
 	if (ret != 0)
 		return ret;
 
-	ret = ad719x_wait_rdy_go_low(dev);
+	ret = ad719x_wait_rdy_stat(dev);
 	if (ret != 0)
 		return ret;
 
@@ -669,7 +649,7 @@ int ad719x_continuous_read_avg(struct ad719x_dev *dev,
 		return ret;
 
 	for (count = 0; count < sample_number; count++) {
-		ret = ad719x_wait_rdy_go_low(dev);
+		ret = ad719x_wait_rdy_stat(dev);
 		if (ret != 0)
 			return ret;
 
