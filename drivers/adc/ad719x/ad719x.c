@@ -741,9 +741,5 @@ float ad719x_convert_to_volts(struct ad719x_dev *dev,
 *******************************************************************************/
 int ad719x_sync_control(struct ad719x_dev *dev, uint8_t value)
 {
-	if(dev->sync_pin) {
-		return no_os_gpio_set_value(dev->sync_pin, value);
-	} else {
-		return -ENOTSUP;
-	}
+    return -ENOTSUP;
 }
