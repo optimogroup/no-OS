@@ -44,7 +44,6 @@
 /***************************** Include Files **********************************/
 /******************************************************************************/
 #include <stdint.h>
-#include "no_os_gpio.h"
 #include "no_os_spi.h"
 #include "no_os_util.h"
 
@@ -195,9 +194,6 @@ enum ad719x_chip_id {
 struct ad719x_dev {
 	/* SPI */
 	struct no_os_spi_desc		*spi_desc;
-	/* GPIO */
-	struct no_os_gpio_desc	*gpio_miso;
-	struct no_os_gpio_desc	*sync_pin;
 	/* Device Settings */
 	uint8_t			current_polarity;
 	enum ad719x_adc_gain	current_gain;
@@ -213,10 +209,6 @@ struct ad719x_dev {
 struct ad719x_init_param {
 	/* SPI */
 	struct no_os_spi_init_param		*spi_init;
-	/* GPIO */
-	struct no_os_gpio_init_param	*gpio_miso;
-	/* Optional GPIO pin - only for multiple devices */
-	struct no_os_gpio_init_param	*sync_pin;
 	/* Device Settings */
 	uint8_t			current_polarity;
 	enum ad719x_adc_gain	current_gain;
