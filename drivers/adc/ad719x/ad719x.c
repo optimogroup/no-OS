@@ -641,7 +641,7 @@ int ad719x_continuous_read_avg(struct ad719x_dev *dev,
 	int ret;
 
 	command = AD719X_MODE_SEL(AD719X_MODE_CONT) |
-		  AD719X_MODE_CLKSRC(AD719X_INT_CLK_4_92_MHZ_TRIST) |
+		  AD719X_MODE_CLKSRC(dev->clock_source) |
 		  AD719X_MODE_RATE(dev->data_rate_code);
 
 	ret = ad719x_set_register_value(dev, AD719X_REG_MODE, command, 3);
@@ -653,9 +653,16 @@ int ad719x_continuous_read_avg(struct ad719x_dev *dev,
 		if (ret != 0)
 			return ret;
 
-		ret = ad719x_get_register_value(dev, AD719X_REG_DATA, 3, &samples);
+		ret = ad719x_get_register_value(dev, AD719X_REG_DATA, 4, &samples);
 		if(ret != 0)
 			return ret;
+
+        uint32_t status = samples & 0xFF;
+        samples = samples >> 8;
+
+        if ((status & AD719X_STAT_CH0) == 0) {
+            continue;
+        }
 
 		*samples_avg += samples;
 	}
